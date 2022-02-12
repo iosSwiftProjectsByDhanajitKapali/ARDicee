@@ -59,7 +59,20 @@ class ViewController: UIViewController {
         // Pause the view's session
         sceneView.session.pause()
     }
-
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first{
+            let touchLocation = touch.location(in: sceneView)
+            
+            //convert this 2D location of the touch to 3D coordinate for the ARScene
+            let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
+            if !results.isEmpty{
+                print("Touched the plane")
+            }else{
+                print("Touched outside the plane")
+            }
+        }
+    }
 }
 
 
