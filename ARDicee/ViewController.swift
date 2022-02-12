@@ -40,10 +40,12 @@ class ViewController: UIViewController {
             // Set the scene to the view
             sceneView.scene.rootNode.addChildNode(diceNode)
         }
-            
-        
     }
     
+}
+
+// MARK: - LifeCycle Methods
+extension ViewController{
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -70,24 +72,7 @@ class ViewController: UIViewController {
             let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
             if let hitResult = results.first{
                 print("Touched the plane")
-                // Create a new scene
-                let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
-                
-                if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true){
-                    diceNode.position = SCNVector3(
-                        hitResult.worldTransform.columns.3.x,
-                        hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
-                        hitResult.worldTransform.columns.3.z
-                    )
-                    
-                    diceArray.append(diceNode)
-                    
-                    // Set the scene to the view
-                    sceneView.scene.rootNode.addChildNode(diceNode)
-                    
-                    rollDice(dice: diceNode)
-                }
-                
+                addDice(atLocation: hitResult)
             }else{
                 print("Touched outside the plane")
             }
@@ -99,7 +84,29 @@ class ViewController: UIViewController {
     }
 }
 
+// MARK: - Private Methods
 private extension ViewController{
+    
+    func addDice(atLocation location: ARHitTestResult){
+        // Create a new scene
+        let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+        
+        if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true){
+            diceNode.position = SCNVector3(
+                location.worldTransform.columns.3.x,
+                location.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
+                location.worldTransform.columns.3.z
+            )
+            
+            diceArray.append(diceNode)
+            
+            // Set the scene to the view
+            sceneView.scene.rootNode.addChildNode(diceNode)
+            
+            rollDice(dice: diceNode)
+        }
+    }
+    
     func rollAllDices(){
         if !diceArray.isEmpty{
             for dice in diceArray{
@@ -122,6 +129,7 @@ private extension ViewController{
     }
 }
 
+// MARK: - ARSCNViewDelegate Methods
 extension ViewController : ARSCNViewDelegate{
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         if anchor is ARPlaneAnchor{ //check if its a 2D plane anchor
