@@ -11,6 +11,8 @@ import ARKit
 
 class ViewController: UIViewController {
 
+    var diceArray = [SCNNode]()
+    
     @IBOutlet var sceneView: ARSCNView!
     
     override func viewDidLoad() {
@@ -77,29 +79,48 @@ class ViewController: UIViewController {
                         hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
                         hitResult.worldTransform.columns.3.z
                     )
+                    
+                    diceArray.append(diceNode)
+                    
                     // Set the scene to the view
                     sceneView.scene.rootNode.addChildNode(diceNode)
                     
-                    //generate some random angles(multiple of 90-deg) to rotate the dice
-                    let randomX = (Float(arc4random_uniform(4)) + 1) * (Float.pi/2)
-                    let randomZ = (Float(arc4random_uniform(4)) + 1) * (Float.pi/2)
-                    
-                    diceNode.runAction(SCNAction.rotateTo(
-                        x: CGFloat(randomX * 3),
-                        y: 0,
-                        z: CGFloat(randomZ * 3),
-                        duration: 0.5
-                    ))
+                    rollDice(dice: diceNode)
                 }
-                
                 
             }else{
                 print("Touched outside the plane")
             }
         }
     }
+    
+    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+        rollAllDices()
+    }
 }
 
+private extension ViewController{
+    func rollAllDices(){
+        if !diceArray.isEmpty{
+            for dice in diceArray{
+                rollDice(dice : dice)
+            }
+        }
+    }
+    
+    func rollDice(dice : SCNNode){
+        //generate some random angles(multiple of 90-deg) to rotate the dice
+        let randomX = (Float(arc4random_uniform(4)) + 1) * (Float.pi/2)
+        let randomZ = (Float(arc4random_uniform(4)) + 1) * (Float.pi/2)
+        
+        dice.runAction(SCNAction.rotateTo(
+            x: CGFloat(randomX * 3),
+            y: 0,
+            z: CGFloat(randomZ * 3),
+            duration: 0.5
+        ))
+    }
+}
 
 extension ViewController : ARSCNViewDelegate{
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
