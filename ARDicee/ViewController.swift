@@ -66,8 +66,20 @@ class ViewController: UIViewController {
             
             //convert this 2D location of the touch to 3D coordinate for the ARScene
             let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
-            if !results.isEmpty{
+            if let hitResult = results.first{
                 print("Touched the plane")
+                // Create a new scene
+                let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+                
+                if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true){
+                    diceNode.position = SCNVector3(
+                        hitResult.worldTransform.columns.3.x,
+                        hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
+                        hitResult.worldTransform.columns.3.z
+                    )
+                    // Set the scene to the view
+                    sceneView.scene.rootNode.addChildNode(diceNode)
+                }
             }else{
                 print("Touched outside the plane")
             }
